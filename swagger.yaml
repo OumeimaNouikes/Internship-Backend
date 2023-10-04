@@ -1,0 +1,606 @@
+openapi: 3.0.3
+info:
+  title: OpsHub API
+  version: 1.0.0
+  description: API for OpsHub
+servers:
+  - url: http://localhost:8000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+defenitions:
+  schemas:
+    User:
+      properties:
+        user_name:
+          type: string
+          description: Name of the user
+          example: "Oumeima"
+        user_email:
+          type: string
+          description: Email of the user
+          example: "oumeima@gmail.com"
+        state:
+          type: string
+          description: Password of the user
+          example: "FN"
+        country:
+          type: string
+          description: Country of the user
+          example: "France" 
+    webConsole:
+      properties:
+        https_enabled:
+          type: boolean
+        certificate_path:
+          type: string
+        certificate_key_password:
+          type: string
+        certificate_key_manager_password:
+          type: string
+        access_port:
+          type: integer           
+paths:
+  /authentication/login:
+    post:
+      tags:
+        - Authorization
+      summary: "Returns Authorization Token"
+      description: "Authorizes default users with username and password set as root to use the endpoints"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "oumeima@gmail.com"
+                password:
+                  type: string
+                  example: "om123456"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: "Authorization token"
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data: "token"
+
+  /user/profile:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - User
+      summary: Returns Profile Information
+      description: Gather information profile for authenticated user
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: User Information
+          content:
+            application/json:
+              schema:
+                $ref: '#/defenitions/schemas/User'
+  /dashboard/:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - User 
+      summary: Get User name
+      description: Retrieve user name about the authenticated user.
+      responses:
+        '200':
+          description: User name
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_name:
+                    type: string
+                    description: The name of the user.
+        '500':
+          description: Internal Server Error
+  /user/{id}:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - User
+      summary: Returns Profile Information updated
+      description: Change information profile for authenticated user
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+            example: eafd8a04-4c56-48ce-a2d9-b40fb30fdf38
+          required: true
+          description: The user id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_name:
+                  type: string
+                  example: oumeima
+                user_email:
+                  type: string
+                  example: nuiguesoumeima@gmail.com
+                state:
+                  type: string
+                  example: TN
+                country:
+                  type: string
+                  example: Tunisia
+                user_id:
+                  type: string
+                  format: uuid
+                  example: eafd8a04-4c56-48ce-a2d9-b40fb30fdf38
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Updated User Information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_name:
+                    type: string
+                  user_email:
+                    type: string
+                  country:
+                    type: string
+                  state:
+                    type: string
+  /user/password-reset:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - User
+      summary: Reset User Password
+      description: Change the password for a user account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  description: The new password.
+                user_email:
+                  type: string
+                  description: The email of the user whose password is being changed.
+      responses:
+        '200':
+          description: Password Change Successful
+  /systems/create:
+    post:
+      tags:
+        - Connected Systems
+      summary: Create a Connected System
+      description: Upload and create a connected system with a name and image.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          description: Internal Server Error
+
+  /systems/connectedsystems:
+    get:
+      tags:
+        - Connected Systems
+      summary: Get Connected Systems
+      description: Retrieve a list of connected systems.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '500':
+          description: Internal Server Error
+  /instance/create:
+    post:
+      tags:
+        - Connected System Instances
+      summary: Create a Connected System Instance
+      description: Create a connected system instance with systemId, name, and URL.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                systemId:
+                  type: string
+                  example: "a0f70c4c-53fc-487d-85e7-60f4e34013a1"
+                name:
+                  type: string
+                  example: "ServiceNowInstanceS"
+                url:
+                  type: string
+                  example: "https://www.google.tn"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+              properties:
+                systemId:
+                  type: string
+                name:
+                  type: string
+                url:
+                  type: string
+        '500':
+          description: Internal Server Error
+
+  /instance/system1-instances/{connected_system_id_1}:
+    get:
+      tags:
+        - Connected System Instances
+      summary: Get System 1 Instances
+      description: Retrieve instances for System 1 by connected_system_id_1.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: connected_system_id_1
+          schema:
+            type: string
+          required: true
+          description: The connected_system_id_1 for System 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '500':
+          description: Internal Server Error
+
+  /instance/system2-instances/{connected_system_id_2}:
+    get:
+      tags:
+        - Connected System Instances
+      summary: Get System 2 Instances
+      description: Retrieve instances for System 2 by connected_system_id_2.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: connected_system_id_2
+          schema:
+            type: string
+          required: true
+          description: The connected_system_id_2 for System 2
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '500':
+          description: Internal Server Error
+
+  /instance/count:
+    get:
+      tags:
+        - Connected System Instances
+      summary: Get Count of Connected System Instances
+      description: Retrieve the count of connected_system_instances.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+        '500':
+          description: Internal Server Error
+
+  /instance/check-url-validity:
+    get:
+      tags:
+        - Connected System Instances
+      summary: Check URL Validity
+      description: Check the validity of a provided URL.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: url
+          schema:
+            type: string
+          required: true
+          description: URL to be checked
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isValid:
+                    type: boolean
+        '500':
+          description: Internal Server Error
+  /template/create:
+    post:
+      tags:
+        - Templates
+      summary: Create a Template
+      description: Create a template with description, connected_system_id_1, connected_system_id_2, and images.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                connected_system_id_1:
+                  type: string
+                connected_system_id_2:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          description: Internal Server Error
+
+  /template/templates:
+    get:
+      tags:
+        - Templates
+      summary: Get Templates
+      description: Retrieve all templates.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '500':
+          description: Internal Server Error
+
+  /template/delete/{id}:
+    delete:
+      tags:
+        - Templates
+      summary: Delete Template
+      description: Delete a template by ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            format: int64
+          required: true
+          description: The template ID to delete
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid template ID"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Template not found"
+        '500':
+          description: Internal Server Error
+  /integration/create:
+    post:
+      tags:
+        - Integrations
+      summary: Create an Integration
+      description: Create an integration with name, template_id, system_instance_id_1, and system_instance_id_2.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                template_id:
+                  type: integer
+                system_instance_id_1:
+                  type: string
+                system_instance_id_2:
+                  type: string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          description: Internal Server Error
+
+  /integration/count:
+    get:
+      tags:
+        - Integrations
+      summary: Get Integration Count
+      description: Retrieve the count of integrations.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+        '500':
+          description: Internal Server Error
+  /settings/web:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Settings
+      summary: "Returns web console Information"
+      description: "Gather web console information"
+      parameters:
+        - in: header
+          name: Access-Port
+          schema:
+            type: string
+          required: true
+          description: The access port for which to retrieve settings.
+      responses:
+        '200':
+          description: "Web console Information"
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/schemas/webConsole'
+  /settings/update:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Settings
+      summary: Update Web Console Settings
+      description: Updates web console settings in the database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                https_enabled:
+                  type: boolean
+                certificate_path:
+                  type: string
+                certificate_key_password:
+                  type: string
+                certificate_key_manager_password:
+                  type: string
+                access_port:
+                  type: integer
+      responses:
+        '200':
+          description: Updated Web Console Settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  https_enabled:
+                    type: boolean
+                  certificate_path:
+                    type: string
+                  certificate_key_password:
+                    type: string
+                  certificate_key_manager_password:
+                    type: string
+                  access_port:
+                    type: integer
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error          
