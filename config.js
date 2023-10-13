@@ -4,7 +4,7 @@ const Pool =require("pg").Pool;
 const pool=new Pool({
 
     user: "postgres",
-    password: "Coral2023_",
+    password: "",
     host:"147.135.247.54",
     port:5432,
     database:"idm"
@@ -15,7 +15,7 @@ const pool=new Pool({
 
 const pool1 = new Pool({
     user: 'postgres',
-    password: 'Coral2023_',
+    password: '',
     host: '147.135.247.54',
     port: 5432,
     database: 'settings',
@@ -23,7 +23,7 @@ const pool1 = new Pool({
 
   const pool2 = new Pool({
     user: 'postgres',
-    password: 'Coral2023_',
+    password: '',
     host: '147.135.247.54',
     port: 5432,
     database: 'integration',
