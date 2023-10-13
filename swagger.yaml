@@ -247,7 +247,7 @@ paths:
       tags:
         - Connected System Instances
       summary: Create a Connected System Instance
-      description: Create a connected system instance with systemId, name, and URL.
+      description: Create a connected system instance with connected_system_name, name, and URL.
       security:
         - bearerAuth: []
       requestBody:
@@ -257,9 +257,9 @@ paths:
             schema:
               type: object
               properties:
-                systemId:
+                connected_system_name:
                   type: string
-                  example: "a0f70c4c-53fc-487d-85e7-60f4e34013a1"
+                  example: "Service Now"
                 name:
                   type: string
                   example: "ServiceNowInstanceS"
@@ -390,7 +390,7 @@ paths:
       tags:
         - Templates
       summary: Create a Template
-      description: Create a template with description, connected_system_id_1, connected_system_id_2, and images.
+      description: Create a template with description, connectedSystemName1, connectedSystemName2 and images.
       security:
         - bearerAuth: []
       requestBody:
@@ -402,9 +402,9 @@ paths:
               properties:
                 description:
                   type: string
-                connected_system_id_1:
+                connectedSystemName1:
                   type: string
-                connected_system_id_2:
+                connectedSystemName2:
                   type: string
                 images:
                   type: array

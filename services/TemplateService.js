@@ -1,21 +1,19 @@
-const{
-    createTemplate
-}= require('../db/templateDb');
+const TemplateDB = require("../db/templateDb");
 
-
-
-class templateService{
-
-
-
-createTemplate = async (data) => {
-    try {
-      return await createTemplate(data);
-    } catch (error) {
-      console.error('Error:', error);
-  throw error;
-    }
-  };
-
+async function createTemplate(description, image1, image2, connectedSystemName1, connectedSystemName2) {
+    return TemplateDB.createTemplate(description, image1, image2, connectedSystemName1, connectedSystemName2);
 }
-module.exports = new templateService();
+
+async function getAllTemplates() {
+    return TemplateDB.getTemplates();
+}
+
+async function deleteTemplate(id) {
+    return TemplateDB.deleteTemplate(id);
+}
+
+module.exports = {
+    createTemplate,
+    getAllTemplates,
+    deleteTemplate,
+};
